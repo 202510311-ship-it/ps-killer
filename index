@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>POS Killer - GitHub Login</title>
+  <!-- Supabase JS SDK 불러오기 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>POS Killer</h1>
+
+  <!-- 로그인 전/후 상태 표시 영역 -->
+  <div id="auth-container">
+    <button id="login-btn" onclick="loginWithGitHub()">GitHub 계정으로 로그인</button>
+    <div id="user-profile" style="display: none;">
+      <p id="user-name"></p>
+      <button onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+
+  <script>
+    // 1. Supabase 클라이언트 초기화 (본인의 Anon Key로 변경하세요)
+    const SUPABASE_URL = 'https://kxuqrpapzswogbfmubax.supabase.co';
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Supabase Project Settings > API의 anon key 입력
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 2. GitHub 로그인 실행 함수
+    async function loginWithGitHub() {
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: 'https://202510311-ship-it.github.io/ps-killer/'
+        }
+      });
+      if (error) alert('로그인 실패: ' + error.message);
+    }
+
+    // 3. 로그아웃 함수
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.reload();
+    }
+
+    // 4. 페이지 로드 시 현재 로그인 상태 체크
+    async function checkAuthState() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+
+      if (user) {
+        document.getElementById('login-btn').style.display = 'none';
+        document.getElementById('user-profile').style.display = 'block';
+        document.getElementById('user-name').innerText = `${user.user_metadata.full_name || user.email}님 반가워요!`;
+      }
+    }
+
+    checkAuthState();
+  </script>
+</body>
+</html>
